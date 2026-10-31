@@ -1,3 +1,4 @@
+<?php require_once 'core/auth.php'; ?>
 <?php require_once 'core/dbConfig.php'; ?>
 <?php require_once 'core/models.php'; ?>
 <?php
@@ -18,6 +19,7 @@ $modelId = urlencode($_GET['model_id']);
 	<link rel="stylesheet" href="styles.css">
 </head>
 <body>
+	<?php include 'core/userbar.php'; ?>
 	<h1>Are you sure you want to delete this model?</h1>
 	<div class="card">
 		<h2>Model: <?php echo e($getModelByID['model_name']); ?></h2>

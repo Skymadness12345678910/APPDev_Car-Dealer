@@ -1,3 +1,4 @@
+<?php require_once 'core/auth.php'; ?>
 <?php require_once 'core/dbConfig.php'; ?>
 <?php require_once 'core/models.php'; ?>
 <?php
@@ -16,6 +17,7 @@ if (!$getBrandByID) {
 	<link rel="stylesheet" href="styles.css">
 </head>
 <body>
+	<?php include 'core/userbar.php'; ?>
 	<h1>Are you sure you want to delete this brand?</h1>
 	<p class="warning">Warning: all models under this brand will also be deleted.</p>
 	<div class="card">

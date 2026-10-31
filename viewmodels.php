@@ -1,13 +1,6 @@
-<?php require_once 'core/dbConfig.php'; ?>
+<?php require_once 'core/auth.php'; ?>
 <?php require_once 'core/models.php'; ?>
-<?php
-$getBrandByID = getBrandByID($pdo, $_GET['brand_id'] ?? 0);
-if (!$getBrandByID) {
-	header("Location: index.php");
-	exit;
-}
-$brandId = urlencode($_GET['brand_id']);
-?>
+<?php require_once 'core/dbConfig.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,10 +10,12 @@ $brandId = urlencode($_GET['brand_id']);
 	<link rel="stylesheet" href="styles.css">
 </head>
 <body>
+	<?php include 'core/userbar.php'; ?>
 	<a href="index.php">Return to home</a>
+	<?php $getBrandByID = getBrandByID($pdo, $_GET['brand_id']); ?>
 	<h1>Brand: <?php echo e($getBrandByID['brand_name']); ?> (<?php echo e($getBrandByID['country']); ?>)</h1>
 	<h1>Add New Model</h1>
-	<form action="core/handleForms.php?brand_id=<?php echo $brandId; ?>" method="POST">
+	<form action="core/handleForms.php?brand_id=<?php echo $_GET['brand_id']; ?>" method="POST">
 		<p>
 			<label>Model Name</label>
 			<input type="text" name="modelName" required>
@@ -37,7 +32,7 @@ $brandId = urlencode($_GET['brand_id']);
 		</p>
 		<p>
 			<label>Year Model</label>
-			<input type="number" name="yearModel" min="1900" max="2100" required>
+			<input type="number" name="yearModel" required>
 		</p>
 		<p>
 			<label>Color</label>
@@ -61,20 +56,20 @@ $brandId = urlencode($_GET['brand_id']);
 		</p>
 		<p>
 			<label>Seating Capacity</label>
-			<input type="number" name="seatingCapacity" min="1" required>
+			<input type="number" name="seatingCapacity" required>
 		</p>
 		<p>
 			<label>Price</label>
-			<input type="number" step="0.01" min="0" name="price" required>
+			<input type="number" step="0.01" name="price" required>
 		</p>
 		<p>
 			<label>Stock</label>
-			<input type="number" min="0" name="stock" required>
+			<input type="number" name="stock" required>
 			<input type="submit" name="insertModelBtn" value="Add">
 		</p>
 	</form>
 
-	<table style="width:100%; margin-top: 50px;">
+	<table>
 	  <tr>
 	    <th>ID</th>
 	    <th>Model</th>
@@ -88,12 +83,15 @@ $brandId = urlencode($_GET['brand_id']);
 	    <th>Stock</th>
 	    <th>Brand</th>
 	    <th>Date Added</th>
+	    <th>Added By</th>
+	    <th>Last Updated By</th>
+	    <th>Last Updated</th>
 	    <th>Action</th>
 	  </tr>
 	  <?php $getModelsByBrand = getModelsByBrand($pdo, $_GET['brand_id']); ?>
 	  <?php foreach ($getModelsByBrand as $row) { ?>
 	  <tr>
-	  	<td><?php echo e($row['model_id']); ?></td>
+	  	<td><?php echo $row['model_id']; ?></td>
 	  	<td><?php echo e($row['model_name']); ?></td>
 	  	<td><?php echo e($row['body_type']); ?></td>
 	  	<td><?php echo e($row['year_model']); ?></td>
@@ -105,9 +103,12 @@ $brandId = urlencode($_GET['brand_id']);
 	  	<td><?php echo e($row['stock']); ?></td>
 	  	<td><?php echo e($row['brand_name']); ?></td>
 	  	<td><?php echo e($row['date_added']); ?></td>
+	  	<td><?php echo e($row['added_by_name']); ?></td>
+	  	<td><?php echo e($row['updated_by_name']); ?></td>
+	  	<td><?php echo e($row['last_updated']); ?></td>
 	  	<td>
-	  		<a href="editmodel.php?model_id=<?php echo urlencode($row['model_id']); ?>&brand_id=<?php echo $brandId; ?>">Edit</a>
-	  		<a href="deletemodel.php?model_id=<?php echo urlencode($row['model_id']); ?>&brand_id=<?php echo $brandId; ?>">Delete</a>
+	  		<a href="editmodel.php?model_id=<?php echo $row['model_id']; ?>&brand_id=<?php echo $_GET['brand_id']; ?>">Edit</a>
+	  		<a href="deletemodel.php?model_id=<?php echo $row['model_id']; ?>&brand_id=<?php echo $_GET['brand_id']; ?>">Delete</a>
 	  	</td>
 	  </tr>
 	  <?php } ?>

@@ -1,4 +1,5 @@
 <?php
+require_once 'core/auth.php';
 require_once 'core/dbConfig.php';
 require_once 'core/models.php';
 
@@ -24,7 +25,8 @@ if (isset($_POST['insertModelBtn'])) {
 			$_POST['seatingCapacity'],
 			$_POST['price'],
 			$_POST['stock'],
-			$brandId
+			$brandId,
+			$_SESSION['user_id']
 		);
 
 		if ($query) {
@@ -49,6 +51,7 @@ $selectedBrand = $_POST['brandId'] ?? ($_GET['brand_id'] ?? '');
 	<link rel="stylesheet" href="styles.css">
 </head>
 <body>
+	<?php include 'core/userbar.php'; ?>
 	<a href="index.php">Return to home</a>
 	<h1>Add New Car Model</h1>
 

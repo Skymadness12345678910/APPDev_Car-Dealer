@@ -1,3 +1,4 @@
+<?php require_once 'core/auth.php'; ?>
 <?php require_once 'core/dbConfig.php'; ?>
 <?php require_once 'core/models.php'; ?>
 <?php
@@ -18,6 +19,7 @@ $modelId = urlencode($_GET['model_id']);
 	<link rel="stylesheet" href="styles.css">
 </head>
 <body>
+	<?php include 'core/userbar.php'; ?>
 	<a href="viewmodels.php?brand_id=<?php echo $brandId; ?>">View The Models</a>
 	<h1>Edit the model!</h1>
 	<form action="core/handleForms.php?model_id=<?php echo $modelId; ?>&brand_id=<?php echo $brandId; ?>" method="POST">

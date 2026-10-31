@@ -1,70 +1,259 @@
+/* ---------- BASE ---------- */
+* {
+	box-sizing: border-box;
+}
+
 body {
-	font-family: "Arial";
-	background-color: #f2f4f8;
-	padding: 20px;
+	font-family: "Segoe UI", Arial, sans-serif;
+	font-size: 16px;
+	background-color: #f4f6fa;
+	color: #2c3e50;
+	max-width: 1700px;
+	margin: 0 auto;
+	padding: 20px 40px;
+
+	/* page becomes a grid: cards sit side by side, everything else spans the full width */
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+	gap: 18px;
+}
+
+/* everything except cards takes the full row */
+body > *:not(.card) {
+	grid-column: 1 / -1;
 }
 
 h1 {
 	color: #1f3a5f;
+	font-size: 28px;
+	margin: 10px 0 0;
 }
 
-input, select {
-	font-size: 1.2em;
-	height: 45px;
-	width: 220px;
-	margin-top: 5px;
+h2 {
+	font-size: 18px;
+	margin: 8px 0;
 }
 
-input[type="submit"] {
-	background-color: #2d6cdf;
-	color: white;
-	border: none;
-	border-radius: 5px;
-	cursor: pointer;
-	width: 120px;
+h3 {
+	font-size: 16px;
+	font-weight: 500;
+	margin: 6px 0;
 }
 
-input[type="submit"]:hover {
-	opacity: 0.85;
+/* ---------- LINKS ---------- */
+a {
+	color: #2d6cdf;
+	text-decoration: none;
+	margin-right: 10px;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+body > a {
+	justify-self: start;
+}
+
+/* ---------- FORMS ---------- */
+body > form {
+	background: white;
+	padding: 20px 25px;
+	border-radius: 10px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+	gap: 5px 25px;
+	align-items: end;
+}
+
+form p {
+	margin: 8px 0;
 }
 
 label {
 	display: block;
-	font-weight: bold;
+	font-weight: 600;
+	font-size: 14px;
+	margin-bottom: 4px;
 }
 
-a {
-	color: #2d6cdf;
-	margin-right: 10px;
+input, select {
+	width: 100%;
+	height: 40px;
+	padding: 0 10px;
+	font-size: 15px;
+	border: 1px solid #cfd6e0;
+	border-radius: 6px;
+	background: white;
 }
 
+input:focus, select:focus {
+	outline: none;
+	border-color: #2d6cdf;
+	box-shadow: 0 0 0 3px rgba(45, 108, 223, 0.15);
+}
+
+input[type="submit"] {
+	width: auto;
+	min-width: 120px;
+	margin-top: 10px;
+	padding: 0 22px;
+	background-color: #2d6cdf;
+	color: white;
+	font-weight: 600;
+	border: none;
+	cursor: pointer;
+}
+
+input[type="submit"]:hover {
+	background-color: #1f56bd;
+}
+
+/* ---------- CARDS ---------- */
 .card {
 	background: white;
-	border: 2px solid #1f3a5f;
+	border-left: 5px solid #2d6cdf;
 	border-radius: 10px;
-	padding: 15px;
-	margin-top: 20px;
-	width: 50%;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+	padding: 15px 22px;
 	overflow: auto;
+	transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.card:hover {
+	transform: translateY(-3px);
+	box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
 .actions {
 	float: right;
-	margin-right: 20px;
+	margin-top: 10px;
 }
 
-.warning {
-	color: #e74c3c;
-	font-weight: bold;
+.actions a,
+td a {
+	display: inline-block;
+	padding: 6px 12px;
+	margin: 2px;
+	background-color: #2d6cdf;
+	color: white;
+	font-size: 14px;
+	border-radius: 5px;
 }
 
-table, th, td {
-	border: 1px solid black;
+.actions a:hover,
+td a:hover {
+	opacity: 0.85;
+	text-decoration: none;
+}
+
+.actions a[href^="edit"],
+td a[href^="edit"] {
+	background-color: #f0932b;
+}
+
+.actions a[href^="delete"],
+td a[href^="delete"] {
+	background-color: #e74c3c;
+}
+
+.actions input[type="submit"] {
+	background-color: #e74c3c;
+	margin-top: 0;
+}
+
+.actions input[type="submit"]:hover {
+	background-color: #c0392b;
+}
+
+.actions form {
+	display: block;
+}
+
+/* ---------- TABLE ---------- */
+table {
+	display: block;
+	width: 100%;
+	overflow-x: auto;
 	border-collapse: collapse;
-	padding: 8px;
+	background: white;
+	border-radius: 10px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+th, td {
+	padding: 10px 12px;
+	text-align: left;
+	border-bottom: 1px solid #e3e8ef;
+	white-space: nowrap;
 }
 
 th {
 	background-color: #1f3a5f;
 	color: white;
+	font-size: 14px;
+}
+
+tr:hover td {
+	background-color: #f5f8ff;
+}
+
+/* ---------- MESSAGES ---------- */
+.warning {
+	color: #e74c3c;
+	font-weight: 600;
+	margin: 0;
+}
+
+.message {
+	background-color: #fdecea;
+	color: #c0392b;
+	padding: 10px 12px;
+	border-radius: 6px;
+	font-weight: 600;
+}
+
+.message.success {
+	background-color: #e8f8ef;
+	color: #1e8449;
+}
+
+/* ---------- LOGIN / REGISTER ---------- */
+.auth-box {
+	justify-self: center;
+	background: white;
+	border-top: 5px solid #2d6cdf;
+	border-radius: 10px;
+	box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+	padding: 20px 30px 25px;
+	margin: 30px 0;
+	width: 100%;
+	max-width: 400px;
+}
+
+.auth-box h1 {
+	font-size: 22px;
+	text-align: center;
+	margin-top: 5px;
+}
+
+.auth-box input[type="submit"] {
+	width: 100%;
+}
+
+/* ---------- USER BAR ---------- */
+.userbar {
+	background-color: #1f3a5f;
+	color: white;
+	padding: 12px 20px;
+	border-radius: 8px;
+	text-align: right;
+	font-size: 14px;
+}
+
+.userbar a {
+	color: #f7b955;
+	font-weight: 600;
+	margin: 0 0 0 5px;
 }

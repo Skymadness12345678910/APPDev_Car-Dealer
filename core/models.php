@@ -1,101 +1,161 @@
 <?php
 
-// Escape output for safe display in HTML
+// helper: safely print text on a page
 function e($value) {
-	return htmlspecialchars((string)$value, ENT_QUOTES, 'UTF-8');
+	return htmlspecialchars($value ?? '', ENT_QUOTES, 'UTF-8');
 }
+
+// ================= USERS =================
+
+function getUserByUsername($pdo, $username) {
+	$sql = "SELECT * FROM users WHERE username = ?";
+	$stmt = $pdo->prepare($sql);
+	$executeQuery = $stmt->execute([$username]);
+
+	if ($executeQuery) {
+		return $stmt->fetch();
+	}
+}
+
+function registerUser($pdo, $first_name, $last_name, $address, $age, $username, $password) {
+	$sql = "INSERT INTO users (first_name, last_name, address, age, username, password) VALUES (?,?,?,?,?,?)";
+	$stmt = $pdo->prepare($sql);
+	$executeQuery = $stmt->execute([$first_name, $last_name, $address, $age, $username, $password]);
+
+	if ($executeQuery) {
+		return true;
+	}
+}
+
 
 // ================= BRANDS (PARENT) =================
 
-function insertBrand($pdo, $brand_name, $country, $founded_year, $headquarters) {
-	$sql = "INSERT INTO brands (brand_name, country, founded_year, headquarters) VALUES (?,?,?,?)";
+function insertBrand($pdo, $brand_name, $country, $founded_year, $headquarters, $user_id) {
+	$sql = "INSERT INTO brands (brand_name, country, founded_year, headquarters, added_by, last_updated_by)
+			VALUES (?,?,?,?,?,?)";
 	$stmt = $pdo->prepare($sql);
-	return $stmt->execute([$brand_name, $country, $founded_year, $headquarters]);
+	$executeQuery = $stmt->execute([$brand_name, $country, $founded_year, $headquarters, $user_id, $user_id]);
+
+	if ($executeQuery) {
+		return true;
+	}
 }
 
-function updateBrand($pdo, $brand_name, $country, $founded_year, $headquarters, $brand_id) {
+function updateBrand($pdo, $brand_name, $country, $founded_year, $headquarters, $user_id, $brand_id) {
 	$sql = "UPDATE brands
 			SET brand_name = ?,
 				country = ?,
 				founded_year = ?,
-				headquarters = ?
+				headquarters = ?,
+				last_updated_by = ?,
+				last_updated = NOW()
 			WHERE brand_id = ?";
 	$stmt = $pdo->prepare($sql);
-	return $stmt->execute([$brand_name, $country, $founded_year, $headquarters, $brand_id]);
+	$executeQuery = $stmt->execute([$brand_name, $country, $founded_year, $headquarters, $user_id, $brand_id]);
+
+	if ($executeQuery) {
+		return true;
+	}
 }
 
 function deleteBrand($pdo, $brand_id) {
-	// Delete the brand's models first, then the brand, inside one transaction
-	// so a failure never leaves half-deleted data.
-	try {
-		$pdo->beginTransaction();
+	// delete the models of the brand first
+	$deleteModels = "DELETE FROM car_models WHERE brand_id = ?";
+	$deleteStmt = $pdo->prepare($deleteModels);
+	$executeDeleteQuery = $deleteStmt->execute([$brand_id]);
 
-		$deleteModels = $pdo->prepare("DELETE FROM car_models WHERE brand_id = ?");
-		$deleteModels->execute([$brand_id]);
+	if ($executeDeleteQuery) {
+		$sql = "DELETE FROM brands WHERE brand_id = ?";
+		$stmt = $pdo->prepare($sql);
+		$executeQuery = $stmt->execute([$brand_id]);
 
-		$deleteBrand = $pdo->prepare("DELETE FROM brands WHERE brand_id = ?");
-		$deleteBrand->execute([$brand_id]);
-
-		$pdo->commit();
-		return true;
-	}
-	catch (Exception $ex) {
-		if ($pdo->inTransaction()) {
-			$pdo->rollBack();
+		if ($executeQuery) {
+			return true;
 		}
-		return false;
 	}
 }
 
 function getAllBrands($pdo) {
-	$sql = "SELECT * FROM brands ORDER BY brand_name";
+	$sql = "SELECT brands.*,
+				CONCAT(adder.first_name, ' ', adder.last_name) AS added_by_name,
+				CONCAT(updater.first_name, ' ', updater.last_name) AS updated_by_name
+			FROM brands
+			JOIN users AS adder ON brands.added_by = adder.user_id
+			JOIN users AS updater ON brands.last_updated_by = updater.user_id";
 	$stmt = $pdo->prepare($sql);
-	$stmt->execute();
-	return $stmt->fetchAll();
+	$executeQuery = $stmt->execute();
+
+	if ($executeQuery) {
+		return $stmt->fetchAll();
+	}
 }
 
 function getBrandByID($pdo, $brand_id) {
 	$sql = "SELECT * FROM brands WHERE brand_id = ?";
 	$stmt = $pdo->prepare($sql);
-	$stmt->execute([$brand_id]);
-	return $stmt->fetch();
+	$executeQuery = $stmt->execute([$brand_id]);
+
+	if ($executeQuery) {
+		return $stmt->fetch();
+	}
 }
 
 
 // ================= CAR MODELS (CHILD) =================
 
 function getModelsByBrand($pdo, $brand_id) {
-	$sql = "SELECT car_models.*, brands.brand_name AS brand_name
+	$sql = "SELECT car_models.*,
+				brands.brand_name AS brand_name,
+				CONCAT(adder.first_name, ' ', adder.last_name) AS added_by_name,
+				CONCAT(updater.first_name, ' ', updater.last_name) AS updated_by_name
 			FROM car_models
 			JOIN brands ON car_models.brand_id = brands.brand_id
+			JOIN users AS adder ON car_models.added_by = adder.user_id
+			JOIN users AS updater ON car_models.last_updated_by = updater.user_id
 			WHERE car_models.brand_id = ?";
 	$stmt = $pdo->prepare($sql);
-	$stmt->execute([$brand_id]);
-	return $stmt->fetchAll();
+	$executeQuery = $stmt->execute([$brand_id]);
+
+	if ($executeQuery) {
+		return $stmt->fetchAll();
+	}
 }
 
 function getModelByID($pdo, $model_id) {
-	$sql = "SELECT car_models.*, brands.brand_name AS brand_name
+	$sql = "SELECT car_models.*,
+				brands.brand_name AS brand_name,
+				CONCAT(adder.first_name, ' ', adder.last_name) AS added_by_name,
+				CONCAT(updater.first_name, ' ', updater.last_name) AS updated_by_name
 			FROM car_models
 			JOIN brands ON car_models.brand_id = brands.brand_id
+			JOIN users AS adder ON car_models.added_by = adder.user_id
+			JOIN users AS updater ON car_models.last_updated_by = updater.user_id
 			WHERE car_models.model_id = ?";
 	$stmt = $pdo->prepare($sql);
-	$stmt->execute([$model_id]);
-	return $stmt->fetch();
+	$executeQuery = $stmt->execute([$model_id]);
+
+	if ($executeQuery) {
+		return $stmt->fetch();
+	}
 }
 
 function insertModel($pdo, $model_name, $body_type, $year_model, $color, $transmission,
-	$fuel_type, $seating_capacity, $price, $stock, $brand_id) {
+	$fuel_type, $seating_capacity, $price, $stock, $brand_id, $user_id) {
 
 	$sql = "INSERT INTO car_models (model_name, body_type, year_model, color, transmission,
-			fuel_type, seating_capacity, price, stock, brand_id) VALUES (?,?,?,?,?,?,?,?,?,?)";
+			fuel_type, seating_capacity, price, stock, brand_id, added_by, last_updated_by)
+			VALUES (?,?,?,?,?,?,?,?,?,?,?,?)";
 	$stmt = $pdo->prepare($sql);
-	return $stmt->execute([$model_name, $body_type, $year_model, $color, $transmission,
-		$fuel_type, $seating_capacity, $price, $stock, $brand_id]);
+	$executeQuery = $stmt->execute([$model_name, $body_type, $year_model, $color, $transmission,
+		$fuel_type, $seating_capacity, $price, $stock, $brand_id, $user_id, $user_id]);
+
+	if ($executeQuery) {
+		return true;
+	}
 }
 
 function updateModel($pdo, $model_name, $body_type, $year_model, $color, $transmission,
-	$fuel_type, $seating_capacity, $price, $stock, $model_id) {
+	$fuel_type, $seating_capacity, $price, $stock, $user_id, $model_id) {
 
 	$sql = "UPDATE car_models
 			SET model_name = ?,
@@ -106,17 +166,27 @@ function updateModel($pdo, $model_name, $body_type, $year_model, $color, $transm
 				fuel_type = ?,
 				seating_capacity = ?,
 				price = ?,
-				stock = ?
+				stock = ?,
+				last_updated_by = ?,
+				last_updated = NOW()
 			WHERE model_id = ?";
 	$stmt = $pdo->prepare($sql);
-	return $stmt->execute([$model_name, $body_type, $year_model, $color, $transmission,
-		$fuel_type, $seating_capacity, $price, $stock, $model_id]);
+	$executeQuery = $stmt->execute([$model_name, $body_type, $year_model, $color, $transmission,
+		$fuel_type, $seating_capacity, $price, $stock, $user_id, $model_id]);
+
+	if ($executeQuery) {
+		return true;
+	}
 }
 
 function deleteModel($pdo, $model_id) {
 	$sql = "DELETE FROM car_models WHERE model_id = ?";
 	$stmt = $pdo->prepare($sql);
-	return $stmt->execute([$model_id]);
+	$executeQuery = $stmt->execute([$model_id]);
+
+	if ($executeQuery) {
+		return true;
+	}
 }
 
 ?>

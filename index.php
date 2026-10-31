@@ -1,3 +1,4 @@
+<?php require_once 'core/auth.php'; ?>
 <?php require_once 'core/dbConfig.php'; ?>
 <?php require_once 'core/models.php'; ?>
 <!DOCTYPE html>
@@ -9,8 +10,8 @@
 	<link rel="stylesheet" href="styles.css">
 </head>
 <body>
+	<?php include 'core/userbar.php'; ?>
 	<h1>Welcome To Car Dealing System. Add new Car Brands!</h1>
-	<p><a href="insert.php">Add a new car model</a></p>
 	<form action="core/handleForms.php" method="POST">
 		<p>
 			<label>Brand Name</label>
@@ -39,11 +40,14 @@
 		<h3>Founded Year: <?php echo e($row['founded_year']); ?></h3>
 		<h3>Headquarters: <?php echo e($row['headquarters']); ?></h3>
 		<h3>Date Added: <?php echo e($row['date_added']); ?></h3>
+		<h3>Added By: <?php echo e($row['added_by_name']); ?></h3>
+		<h3>Last Updated By: <?php echo e($row['updated_by_name']); ?></h3>
+		<h3>Last Updated: <?php echo e($row['last_updated']); ?></h3>
 
 		<div class="actions">
-			<a href="viewmodels.php?brand_id=<?php echo urlencode($row['brand_id']); ?>">View Models</a>
-			<a href="editbrand.php?brand_id=<?php echo urlencode($row['brand_id']); ?>">Edit</a>
-			<a href="deletebrand.php?brand_id=<?php echo urlencode($row['brand_id']); ?>">Delete</a>
+			<a href="viewmodels.php?brand_id=<?php echo $row['brand_id']; ?>">View Models</a>
+			<a href="editbrand.php?brand_id=<?php echo $row['brand_id']; ?>">Edit</a>
+			<a href="deletebrand.php?brand_id=<?php echo $row['brand_id']; ?>">Delete</a>
 		</div>
 	</div>
 	<?php } ?>
